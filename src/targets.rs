@@ -1,7 +1,6 @@
 //! Target streaming generation
 
 use crate::cidr::IpRange;
-use crate::error::Result;
 use crate::exclude::ExclusionList;
 use std::net::{IpAddr, SocketAddr};
 

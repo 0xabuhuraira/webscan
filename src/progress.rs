@@ -107,8 +107,6 @@ impl ProgressDisplay {
         let tcp_open = self.stats.tcp_open.load(Ordering::Relaxed);
         let minecraft = self.stats.minecraft_found.load(Ordering::Relaxed);
         let invalid = self.stats.invalid_minecraft.load(Ordering::Relaxed);
-        let errors = self.stats.errors.load(Ordering::Relaxed);
-        let excluded = self.stats.excluded.load(Ordering::Relaxed);
         let active = self.stats.active_connections.load(Ordering::Relaxed);
         let rate = self.stats.get_rate(self.start);
         let elapsed = self.start.elapsed();

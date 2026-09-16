@@ -17,18 +17,9 @@ pub async fn resolve_hostname(hostname: &str, timeout_dur: Duration) -> Result<V
     }
 }
 
-/// Reverse resolve IP to hostname
-pub async fn reverse_resolve(ip: IpAddr, timeout_dur: Duration) -> Result<Option<String>> {
-    use std::net::SocketAddr;
-    
-    let socket_addr = SocketAddr::new(ip, 0);
-    
-    match timeout(timeout_dur, async {
-        // Tokio doesn't have built-in reverse DNS, so we skip this for now
-        // In production, you'd use a DNS library like trust-dns
-        Result::<Option<String>>::Ok(None)
-    }).await {
-        Ok(result) => result,
-        Err(_) => Err(crate::error::WebScanError::Timeout),
-    }
+/// Reverse resolve IP to hostname (stub - requires DNS library)
+pub async fn reverse_resolve(_ip: IpAddr, _timeout_dur: Duration) -> Result<Option<String>> {
+    // Tokio doesn't have built-in reverse DNS, so we return None
+    // In production, you'd use a DNS library like trust-dns
+    Ok(None)
 }
