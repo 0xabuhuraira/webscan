@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "webscan"
+version = "1.0.0"
+description = "Production-quality Minecraft Java Edition discovery scanner"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.cargo]
+name = "webscan"
