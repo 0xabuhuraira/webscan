@@ -1,0 +1,18 @@
+# Example proxy list file for WebScan
+# Format: One proxy URL per line
+# Lines starting with # are ignored
+# Credentials are automatically redacted in logs
+
+# SOCKS5 proxies (no auth)
+socks5://127.0.0.1:1080
+socks5://10.0.0.5:1080
+socks5://proxy1.example.com:1080
+
+# SOCKS5 proxies with authentication
+socks5://user:password@10.0.0.10:1080
+socks5://admin:secret@proxy2.example.com:1080
+
+# HTTP CONNECT proxies
+http://proxy3.example.com:8080
+http://user:password@proxy4.example.com:8080
+http://127.0.0.1:3128

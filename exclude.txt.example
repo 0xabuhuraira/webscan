@@ -1,0 +1,28 @@
+# Example exclusion file for WebScan
+# Format: CIDR ranges or individual IPs, one per line
+# Lines starting with # are ignored
+
+# RFC 1918 Private Ranges
+10.0.0.0/8
+172.16.0.0/12
+192.168.0.0/16
+
+# Loopback
+127.0.0.0/8
+::1/128
+
+# Link-local
+169.254.0.0/16
+fe80::/10
+
+# Multicast
+224.0.0.0/4
+ff00::/8
+
+# Reserved
+240.0.0.0/4
+100.64.0.0/10
+
+# Your specific IPs to exclude
+# 8.8.8.8
+# 1.1.1.1

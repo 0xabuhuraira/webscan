@@ -1,0 +1,30 @@
+# Example WebScan configuration file
+# Location: ~/.webscan.toml or specify with --config
+# CLI arguments override these settings
+
+# Concurrency settings
+concurrency = 10000
+per_proxy_concurrency = 500
+
+# Rate limiting (0 = best effort, in attempts/sec)
+rate = 0
+
+# Timeouts (in seconds)
+connect_timeout = 2
+minecraft_timeout = 3
+proxy_timeout = 3
+retries = 1
+
+# Minecraft protocol settings
+protocol_version = 770
+
+# Output settings
+output_format = "text"
+no_progress = false
+randomize_targets = false
+
+# Optional: Set a default output file
+# output_file = "/tmp/webscan_results.ndjson"
+
+# DNS settings
+resolve = false
