@@ -1,12 +1,12 @@
 //! Minecraft Server List Ping protocol implementation
 
 use crate::error::{Result, WebScanError};
-use crate::minecraft_varint::{decode_varint, encode_varint, encode_string, decode_string};
-use bytes::{BytesMut, BufMut, Buf};
-use serde_json::{json, Value};
-use std::io::Cursor;
+use crate::minecraft_varint::{decode_varint, encode_varint, encode_string};
+use bytes::{BytesMut, Buf};
+use serde_json::Value;
 use std::net::SocketAddr;
 use tokio::net::TcpStream;
+use tokio::io::AsyncReadExt;
 use tokio::time::{timeout, Duration};
 
 #[derive(Debug, Clone)]
@@ -118,7 +118,6 @@ pub async fn read_framed_packet(
 ) -> Result<Option<Vec<u8>>> {
     loop {
         // Try to decode packet length
-        let mut cursor = Cursor::new(&buf[..]);
         let mut length_buf = BytesMut::new();
         let mut pos = 0;
         
@@ -129,7 +128,7 @@ pub async fn read_framed_packet(
             }
             let byte = buf[pos];
             pos += 1;
-            length_buf.put_u8(byte);
+            length_buf.extend_from_slice(&[byte]);
             if byte & 0x80 == 0 {
                 break;
             }
@@ -203,10 +202,33 @@ pub fn parse_status_response(packet: &[u8]) -> Result<Value> {
     
     let mut buf = BytesMut::from(&packet[1..]);
     
-    // Read JSON string
-    match crate::minecraft_varint::decode_string(&mut buf)? {
-        Some(json_str) => serde_json::from_str(&json_str)
-            .map_err(|e| WebScanError::MinecraftProtocol(format!("Invalid JSON: {}", e))),
+    // Read JSON string - manually decode to avoid dependency on decode_string
+    if buf.is_empty() {
+        return Err(WebScanError::MinecraftProtocol("No JSON string found".to_string()));
+    }
+    
+    // Try to extract the string length (VarInt)
+    let mut len_buf = buf.clone();
+    match crate::minecraft_varint::decode_varint(&mut len_buf)? {
+        Some(len) => {
+            let len = len as usize;
+            if len as usize > 32767 {
+                return Err(WebScanError::MinecraftProtocol("String is too long".to_string()));
+            }
+            
+            // Skip the length VarInt
+            let len_varint = buf.len() - len_buf.len();
+            buf.advance(len_varint);
+            
+            if buf.len() < len {
+                return Err(WebScanError::MinecraftProtocol("Incomplete JSON string".to_string()));
+            }
+            
+            let bytes = buf.split_to(len).to_vec();
+            let json_str = String::from_utf8(bytes)?;
+            serde_json::from_str(&json_str)
+                .map_err(|e| WebScanError::MinecraftProtocol(format!("Invalid JSON: {}", e)))
+        }
         None => Err(WebScanError::MinecraftProtocol("No JSON string found".to_string())),
     }
 }
@@ -231,7 +253,7 @@ mod tests {
     
     #[test]
     fn test_normalize_description() {
-        let json = json!({
+        let json = serde_json::json!({
             "text": "Test Server"
         });
         assert_eq!(normalize_description(json.get("text")), Some("Test Server".to_string()));

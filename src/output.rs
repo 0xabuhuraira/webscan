@@ -2,7 +2,7 @@
 
 use crate::error::{Result, WebScanError};
 use crate::minecraft_status::MinecraftStatus;
-use serde_json::{json, Value};
+use serde_json::json;
 use std::fs::File;
 use std::io::Write;
 use std::net::SocketAddr;
@@ -122,7 +122,7 @@ impl OutputWriter {
             status.players_max.unwrap_or(0)
         );
         let line = format!(
-            "{}:{}  MINECRAFT  "{}"  {}  latency={}ms\n",
+            "{}:{}  MINECRAFT  \"{}\"  {}  latency={}ms\n",
             addr.ip(),
             addr.port(),
             version,

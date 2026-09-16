@@ -3,7 +3,6 @@
 use crate::error::Result;
 use crate::minecraft::probe_minecraft;
 use crate::minecraft_status::MinecraftStatus;
-use crate::output::OutputWriter;
 use crate::progress::ProgressStats;
 use crate::proxy::ProxyPool;
 use crate::socks5::connect_socks5;
@@ -14,7 +13,7 @@ use std::sync::Arc;
 use tokio::net::TcpStream;
 use tokio::sync::Semaphore;
 use tokio::time::Duration;
-use crossbeam_channel::{bounded, Sender, Receiver};
+use crossbeam_channel::{bounded, Receiver};
 
 #[derive(Debug, Clone)]
 pub struct ScanResult {
@@ -51,15 +50,18 @@ impl Scheduler {
         }
     }
 
-    pub async fn run(
+    pub async fn run<I>(
         &self,
-        targets: impl Iterator<Item = SocketAddr>,
+        targets: I,
         stats: ProgressStats,
-    ) -> Result<Receiver<ScanResult>> {
+    ) -> Result<Receiver<ScanResult>>
+    where
+        I: IntoIterator<Item = SocketAddr> + Send + 'static,
+        I::IntoIter: Send + 'static,
+    {
         let (tx, rx) = bounded(self.concurrency as usize * 2);
         let semaphore = Arc::new(Semaphore::new(self.concurrency as usize));
 
-        let concurrency = self.concurrency;
         let connect_timeout = self.connect_timeout;
         let minecraft_timeout = self.minecraft_timeout;
         let protocol_version = self.protocol_version;

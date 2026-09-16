@@ -6,6 +6,7 @@ use std::net::SocketAddr;
 use std::time::Instant;
 use tokio::net::TcpStream;
 use tokio::time::Duration;
+use tokio::io::AsyncWriteExt;
 use bytes::BytesMut;
 
 /// Probe a target for Minecraft Java server
@@ -25,13 +26,13 @@ pub async fn probe_minecraft(
     
     // Send Handshake
     let handshake = generate_handshake(protocol_version, addr, 1);
-    if stream.try_write_all(&handshake).is_err() {
+    if stream.write_all(&handshake).await.is_err() {
         return Ok(None);
     }
     
     // Send Status Request
     let status_req = generate_status_request();
-    if stream.try_write_all(&status_req).is_err() {
+    if stream.write_all(&status_req).await.is_err() {
         return Ok(None);
     }
     
