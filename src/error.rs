@@ -10,6 +10,9 @@ pub enum WebScanError {
     #[error("Parse error: {0}")]
     Parse(String),
 
+    #[error("Parsing error: {0}")]
+    Parsing(String),
+
     #[error("Invalid CIDR: {0}")]
     InvalidCidr(String),
 
@@ -45,6 +48,15 @@ pub enum WebScanError {
 
     #[error("Resource error: {0}")]
     Resource(String),
+
+    #[error("IpNet error: {0}")]
+    IpNet(String),
 }
 
 pub type Result<T> = std::result::Result<T, WebScanError>;
+
+impl From<ipnet::AddrParseError> for WebScanError {
+    fn from(err: ipnet::AddrParseError) -> Self {
+        WebScanError::IpNet(err.to_string())
+    }
+}
